@@ -11,14 +11,9 @@ public class RedisClientGui implements SubListener {
     private static final int CLIENT_NUMBER = 1;
     private final JLabel clientAliveLabel = new JLabel("", SwingConstants.CENTER);
     private final JButton connectionButton = new JButton("Disconnect Client");
-
     private boolean isDisconnected;
-    private JLabel sharedDataLabel = new JLabel();
-    private JLabel messageDataLabel = new JLabel();
     private JFrame frame;
     private JTextField inputKeyTextField = new JTextField();
-
-    private String messageDataString = "Default Message Data - Client #" + CLIENT_NUMBER;
 
     private String outputValue = null;
     JTextArea outputHolder;
@@ -40,7 +35,8 @@ public class RedisClientGui implements SubListener {
         // Shall be interchangeable in the future.
         crudClient = new RedisClient();
         // TODO: remember to set your own virtual IP Address
-        crudClient.connect("172.29.42.26", 6990);
+        // virtual IP at work 172.29.42.26
+        crudClient.connect("127.0.0.1", 6990);
 
         createTestingWindow();
     }
@@ -66,7 +62,6 @@ public class RedisClientGui implements SubListener {
 
         JButton inputReadButton = new JButton("Read");
         inputReadButton.setSize(10,10);
-        inputReadButton.getHorizontalAlignment();
         inputReadButton.addActionListener(e -> getDataFromRead());
 
         panel.add(inputKeyLabel, BorderLayout.WEST);
@@ -108,15 +103,46 @@ public class RedisClientGui implements SubListener {
     }
 
     private void popUpDeleteView() {
+        JPanel panel = new JPanel(new GridLayout(2, 1));
+        JLabel label = new JLabel("Enter user id:");
+        JTextField deleteKey = new JTextField(2);
+        panel.add(label);
+        panel.add(deleteKey);
+
+        int showDialog = JOptionPane.showConfirmDialog(frame, panel, "Delete user", JOptionPane.YES_NO_OPTION);
+        if(showDialog == JOptionPane.YES_OPTION){
+            if(deleteKey.getText() != null){
+                 String userId = crudClient.delete(deleteKey.getText());
+                JOptionPane.showMessageDialog(frame, "You have successfully deleted user: " + userId,"", JOptionPane.INFORMATION_MESSAGE);
+            }
+
+        }else if (showDialog == JOptionPane.NO_OPTION) {
+               JOptionPane.showMessageDialog(frame, "You pressed NO button");
+        }
     }
 
     private void popUpAddView() {
-        String uncheckedString = JOptionPane.showInputDialog(frame, "Input message:", "Client #" + CLIENT_NUMBER);
-        if (uncheckedString != null) {
-            messageDataString = uncheckedString;
-            messageDataLabel.setText(messageDataString);
-            sendMessageData();
+        JPanel panel = new JPanel(new GridLayout(2, 2));
+        JLabel labelKey = new JLabel("ID:");
+        JTextField textFieldId = new JTextField(12);
+        JLabel labelUsername = new JLabel("Username:");
+        JTextField textFieldUsername = new JTextField(12);
+
+        panel.add(labelKey);
+        panel.add(labelUsername);
+        panel.add(textFieldId);
+        panel.add(textFieldUsername);
+        int showDialog = JOptionPane.showConfirmDialog(frame, panel,"Create user", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+        if (showDialog == JOptionPane.OK_OPTION){
+            if(textFieldId.getText() != null && textFieldUsername.getText() != null){
+                crudClient.create(textFieldId.getText(), textFieldUsername.getText());
+            } else {
+                JOptionPane.showMessageDialog(frame, "Something went wrong, please try again","Error", JOptionPane.WARNING_MESSAGE);
+            }
+        } else if (showDialog == JOptionPane.CANCEL_OPTION) {
+                JOptionPane.showMessageDialog(frame, "You pressed cancel button");
         }
+
     }
 
     private JButton createDisconnectButton() {

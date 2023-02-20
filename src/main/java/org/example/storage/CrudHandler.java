@@ -6,7 +6,7 @@ public interface CrudHandler {
     void create(String key, String message);
     String read(String key);
     void update(String key, String message);
-    void delete(String key);
+    String delete(String key);
     void flushAll();
     void publish(String channel, String message);
     void subscribe(String channel, SubListener listener);

@@ -37,8 +37,9 @@ public class RedisClient extends JedisPubSub  implements CrudHandler {
     }
 
     @Override
-    public void delete(String key) {
+    public String delete(String key) {
         client.del(key);
+        return key;
     }
 
     @Override
